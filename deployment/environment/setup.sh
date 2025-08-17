@@ -1,23 +1,30 @@
 #!/bin/bash
-# setup.sh – Configuracion de entorno virtual para observer-core
+# setup.sh – Configuracion minima del entorno virtual para observer-core
 
-# Carpeta interna de repositorio de ejemplo
-REPO_DIR="../../repos/devops-static-web"
-cd "$REPO_DIR" || exit 1
+# Directorio del entorno virtual
+VENV_DIR="./venv"
 
-# Verificar si existe entorno virtual
-if [ ! -d "venv" ]; then
-  echo "[+] Creando entorno virtual..."
-  python3 -m venv venv
-  source venv/bin/activate
-
-  # Instalar dependencias de ejemplo
-  touch requirements.txt
-  echo "# Dependencias de ejemplo" > requirements.txt
-  pip install -r requirements.txt || echo "[!] No hay paquetes reales, instalacin simulada"
-  pip install gunicorn --quiet
-  echo "[✓] Entorno virtual configurado."
+# Crear entorno virtual si no existe
+if [ ! -d "$VENV_DIR" ]; then
+    echo "[+] Creando entorno virtual en $VENV_DIR ..."
+    python3 -m venv $VENV_DIR
 else
-  echo "[✓] Entorno virtual ya existe. Activando..."
-  source venv/bin/activate
+    echo "[✓] Entorno virtual ya existe en $VENV_DIR"
 fi
+
+# Activar entorno virtual(solo para este script)
+source $VENV_DIR/bin/activate
+
+# Actualizar pip
+echo "[+] Actualizando pip..."
+pip install --upgrade pip --quiet
+
+# Instalar dependencias minimas
+echo "[+] Instalando dependencias basicas (FastAPI, Uvicorn)..."
+pip install --quiet fastapi uvicorn psutil
+
+# Confirmacion final
+echo "[✓] Entorno listo. Para iniciar la API:"
+echo "    source venv/bin/activate"  # Desde root debes hacer esto manualmente
+echo "    cd api"
+echo "    uvicorn main:app --reload"
