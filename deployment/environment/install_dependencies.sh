@@ -1,19 +1,18 @@
 #!/bin/bash
 # Instalacion de dependencias basicas para observer-core
-LOG="logs_despliegue.txt"
 
 instalar_dependencias() {
-  echo "[+] Instalando dependencias basicas..." | tee -a $LOG
+  echo "[+] Instalando dependencias basicas..."
 
   # Actualizar e instalar paquetes basicos
-  sudo apt update >> $LOG 2>&1
-  sudo apt install -y python3 python3-pip python3-venv nginx git >> $LOG 2>&1
+  sudo apt update
+  sudo apt install -y python3 python3-pip python3-venv nginx git 
 
   # Configurar Nginx para que inicie automaticamente
-  sudo systemctl enable nginx >> $LOG 2>&1
-  sudo systemctl start nginx >> $LOG 2>&1
+  sudo systemctl enable nginx
+  sudo systemctl start nginx
 
-  echo "[✓] Dependencias instaladas correctamente." | tee -a $LOG
+  echo "[✓] Dependencias instaladas correctamente."
 }
 
 instalar_dependencias
