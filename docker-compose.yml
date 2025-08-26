@@ -1,0 +1,20 @@
+services:
+  observer-core:
+    image: observer-core:latest
+    container_name: observer-core
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - API_PORT=8000
+      - SERVICE_NAME=observer-core
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped

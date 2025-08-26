@@ -99,49 +99,66 @@ CPU and memory usage.
 
 ### Option 2: Docker
 
-1. **Clone the repo(if not done yet):**
-   ```bash
-   git clone git@github.com:fatimacm/observer-core.git
-   cd observer-core
-   ```
-
-2. **Build Docker image:**
+1. **Build Docker image:**
    ```bash
    docker build -t observer-core .
    ```
 
-3. **Run container:**
+2. **Run container:**
    ```bash
    docker run -p 8000:8000 observer-core
    ```
 
-The API will be available at http://localhost:8000
-The container includes a built-in Docker HEALTHCHECK bound to /health.
+- The API will be available at http://localhost:8000
 
+### Option 3: Docker Compose (recommended)
 
-## Running Tests
-All endpoints are tested with pytest to ensure correct structure, types, and value ranges.
+1. **Start service:**
+   ```bash
+   docker-compose up -d
+   ```
 
-### Local Testing
+2. **View logs:**
+   ```bash
+   docker-compose logs -f observer-core
+   ```
+
+2. **Stop services:**
+   ```bash
+   docker-compose down
+   ```
+
+Compose provides:
+
+- Healthcheck integration (/health probed automatically).
+- Environment variables injected (API_PORT, SERVICE_NAME).
+- Easy orchestration for future services (databases, cache, observability).
+
+## Quick Validation
+
+Minimal script to check all endpoints after deployment:
 
    ```bash
-   source venv/bin/activate
+   ./smoke-test.sh
+   ```
+
+- Runs /health, /status, /metrics.
+- Exits 0 if all succeed, non-zero otherwise.
+- Suitable for CI/CD pipelines.
+
+## Testing
+
+### Unit Tests(pytest)
+
+   ```bash
    pytest -v
    ```
 
-### Docker Testing
+or inside container:
 
    ```bash
    docker run --rm observer-core pytest -v
    ```
-
-**Tests include:**
-
-- /health: validates structure and values.
-- /status: validates system info and uptime.
-- /metrics: validates CPU/memory structure, types, and 0–100% ranges.
-- All endpoints: JSON content-type verification.
-- Nonexistent endpoint: returns 404.
 
 ## Docker Commands Reference
 
@@ -178,16 +195,17 @@ All endpoints are tested with pytest to ensure correct structure, types, and val
 ```
 observer-core/
 ├── api/
-│   ├── __pycache__/
 │   └── main.py
 ├── tests/
 │   ├── __init__.py
 │   └── test_api.py
 ├── .dockerignore        
 ├── .gitignore
+├── docker-compose.yml
 ├── Dockerfile           
 ├── README.md
-└── requirements.txt     
+├── requirements.txt
+└── smoke-test.sh   
 ```
 
 ## Dependencies
