@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
 from datetime import datetime
-import psutil
+import psutil, socket, time
 import platform
 
 # START-UP TIME FOR REAL SERVICE UPTIME
@@ -47,13 +48,33 @@ def system_status():
         raise HTTPException(status_code=500, detail="Unable to fetch system status at this time")
 
 
-# ENDPOINT /metrics — real time metrics
-@app.get("/metrics")
-def system_metrics():
+# ---  ENDPOINT FOR PROMETHEUS ---
+@app.get("/metrics", response_class=PlainTextResponse)
+def system_metrics_prometheus():
     """
-    Returns real-time CPU and memory usage metrics.
-    Uses cpu_times_percent for instant snapshot.
-    Handles errors safely.
+    Exposes real-time CPU and memory usage in Prometheus exposition format.
+    """
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        mem = psutil.virtual_memory().percent
+
+        return (
+            f"# HELP observer_core_cpu_percent CPU usage percentage\n"
+            f"# TYPE observer_core_cpu_percent gauge\n"
+            f"observer_core_cpu_percent {cpu_percent}\n"
+            f"# HELP observer_core_memory_percent Memory usage percentage\n"
+            f"# TYPE observer_core_memory_percent gauge\n"
+            f"observer_core_memory_percent {mem}\n"
+        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Unable to fetch Prometheus metrics")
+
+
+# ENDPOINT /metrics — real time metrics
+@app.get("/metrics-json")
+def system_metrics_json():
+    """
+    Returns detailed real-time CPU and memory usage in JSON format.
     """
     try:
         # CPU snapshot by type

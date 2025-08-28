@@ -1,10 +1,9 @@
 services:
   observer-core:
-    image: observer-core:latest
-    container_name: observer-core
     build:
       context: .
       dockerfile: Dockerfile
+    image: observer-core:latest
     ports:
       - "8000:8000"
     environment:
@@ -18,3 +17,35 @@ services:
       retries: 3
       start_period: 5s
     restart: unless-stopped
+    networks:
+      - observer-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    depends_on:
+      - observer-core
+    networks:
+      - observer-net
+
+networks:
+  observer-net:
+    driver: bridge
+
+volumes:
+  prometheus_data:

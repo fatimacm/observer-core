@@ -1,6 +1,6 @@
 # Observer Core
 
-Lightweight system monitoring API built with FastAPI. Provides endpoints to check system health, system status, and real-time metrics. Designed as a foundation for DevOps fundamentals: monitoring, testing, and containerization.
+Minimal FastAPI service with health, status, and metrics endpoints. Now containerized and monitored with Prometheus for observability.
 
 ## API Endpoints
 
@@ -41,11 +41,26 @@ System information and uptime.
 }
 ```
 
-### Real-time Metrics
+### Metrics (Prometheus Format)
+
 ```
 GET /metrics
 ```
-CPU and memory usage.
+CPU and memory usage in Prometheus-native format.
+
+**Response**
+   ```text
+   # HELP observer_core_cpu_percent CPU usage percentage
+   # TYPE observer_core_cpu_percent gauge
+   observer_core_cpu_percent 2.5
+   # HELP observer_core_memory_percent Memory usage percentage
+   # TYPE observer_core_memory_percent gauge
+   observer_core_memory_percent 70.2
+   ```
+
+### Metrics (JSON Format)
+
+CPU and memory usage in JSON format.
 
 **Response:**
 ```json
@@ -109,8 +124,6 @@ CPU and memory usage.
    docker run -p 8000:8000 observer-core
    ```
 
-- The API will be available at http://localhost:8000
-
 ### Option 3: Docker Compose (recommended)
 
 1. **Start service:**
@@ -118,25 +131,24 @@ CPU and memory usage.
    docker-compose up -d
    ```
 
+This starts both observer-core and the Prometheus monitoring stack.
+
 2. **View logs:**
    ```bash
    docker-compose logs -f observer-core
    ```
 
-2. **Stop services:**
+3. **Stop services:**
    ```bash
    docker-compose down
    ```
 
-Compose provides:
-
-- Healthcheck integration (/health probed automatically).
-- Environment variables injected (API_PORT, SERVICE_NAME).
-- Easy orchestration for future services (databases, cache, observability).
+- The API will be available at http://localhost:8000
+- Prometheus monitoring at http://localhost:9090
 
 ## Quick Validation
 
-Minimal script to check all endpoints after deployment:
+Minimal script to validate service health after deployment:
 
    ```bash
    ./smoke-test.sh
@@ -159,6 +171,27 @@ or inside container:
    ```bash
    docker run --rm observer-core pytest -v
    ```
+
+## Observability with Prometheus
+
+Observer Core exposes custom metrics in Prometheus format at /metrics.
+A Prometheus container is included in docker-compose.yml and scrapes these metrics automatically.
+
+### Access Prometheus UI
+
+- URL: http://localhost:9090
+
+### Example Queries
+
+- CPU usage percentage:
+```bash
+   observer_core_cpu_percent
+   ```
+- Memory usage percentage:
+```bash
+   observer_core_memory_percent
+   ```
+These metrics are refreshed in near real-time and reflect the state of the running container.
 
 ## Docker Commands Reference
 
@@ -189,19 +222,20 @@ or inside container:
 
    ```
 
-
 ## Project Structure
 
 ```
 observer-core/
 ├── api/
 │   └── main.py
+├── monitoring/
+│   └── prometheus.yml
 ├── tests/
 │   ├── __init__.py
 │   └── test_api.py
 ├── .dockerignore        
 ├── .gitignore
-├── docker-compose.yml
+├── docker-compose.yml   
 ├── Dockerfile           
 ├── README.md
 ├── requirements.txt

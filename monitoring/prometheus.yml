@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s # ← HOW OFTEN?
+  scrape_timeout: 10s # ← MAXIMUM TIME?
+
+scrape_configs:
+  - job_name: 'observer-core'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['observer-core:8000'] # ← WHERE?
