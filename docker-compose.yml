@@ -5,11 +5,11 @@ services:
       dockerfile: Dockerfile
     image: observer-core:latest
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     environment:
-      - API_PORT=8000
-      - SERVICE_NAME=observer-core
-      - PYTHONUNBUFFERED=1
+      - API_PORT=${API_PORT:-8000}
+      - SERVICE_NAME=${SERVICE_NAME:-observer-core}
+      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED:-1}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -30,7 +30,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=7d'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION_DAYS:-7d}'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
       interval: 30s
